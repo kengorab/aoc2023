@@ -84,7 +84,6 @@ function processInput(input) {
 }
 
 const input = processInput(realInput)
-// console.log(JSON.stringify(input, null, 2))
 
 function resolve(src, ranges) {
   for (const [dstStart, srcStart, len] of ranges) {
@@ -105,27 +104,42 @@ function drill(seed) {
   return resolve(humidity, input.humidityToLocation)
 }
 
-function part1() {
-  const locs = input.seeds.map((seed) => [seed, drill(seed)])
-  return _.minBy(locs, ([, loc]) => loc)[1]
-}
-// console.log(part1()) // 157211394
-
-function part2() {
-  // const seeds = _.chunk(input.seeds, 2).flatMap(([start, len]) => _.range(start, start + len))
-  //
-  // const locs = seeds.map((seed) => [seed, drill(seed)])
-  // return _.minBy(locs, ([, loc]) => loc)[1]
-  let minLoc = Infinity
-  for (const [start, len] of _.chunk(input.seeds, 2)) {
-    console.log(start)
-    for (let seed = start; seed < start + len; seed++) {
-      const loc = drill(seed)
-      if (loc < minLoc) {
-        minLoc = loc
-      }
+function resolveRev(dst, ranges) {
+  for (const [dstStart, srcStart, len] of ranges) {
+    if (dstStart <= dst && dst < dstStart + len) {
+      return srcStart + (dst - dstStart)
     }
   }
-  return minLoc
+  return dst
 }
-console.log(part2())
+
+function drillRev(loc) {
+  const humidity = resolveRev(loc, input.humidityToLocation)
+  const temp = resolveRev(humidity, input.tempToHumidity)
+  const light = resolveRev(temp, input.lightToTemp)
+  const water = resolveRev(light, input.waterToLight)
+  const fert = resolveRev(water, input.fertilizerToWater)
+  const soil = resolveRev(fert, input.soilToFertilizer)
+  return resolveRev(soil, input.seedToSoil)
+}
+
+function part1() {
+  return _.min(input.seeds.map(drill))
+}
+console.log(part1()) // 157211394
+
+function part2() {
+  const seedRanges = _.chunk(input.seeds, 2);
+
+  let loc = 0
+  while (true) {
+    const seed = drillRev(loc)
+    for (const [seedStart, len] of seedRanges) {
+      if (seedStart <= seed && seed < seedStart + len) {
+        return loc
+      }
+    }
+    loc += 1
+  }
+}
+console.log(part2()) // 50855035
