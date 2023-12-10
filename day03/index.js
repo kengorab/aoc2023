@@ -1,5 +1,6 @@
 const fs = require('fs')
 const _ = require('lodash')
+const { getNeighbors } = require('../utils')
 
 const realInput = fs.readFileSync('./input.txt', { encoding: 'utf-8' })
 const demoInput = `
@@ -51,19 +52,6 @@ function processInput(input) {
   }
 
   return { symbols, numbers }
-}
-
-function getNeighbors([x, y]) {
-  return [
-    [x - 1, y - 1],
-    [x, y - 1],
-    [x + 1, y - 1],
-    [x - 1, y],
-    [x + 1, y],
-    [x - 1, y + 1],
-    [x, y + 1],
-    [x + 1, y + 1],
-  ]
 }
 
 const { symbols, numbers } = processInput(realInput)
